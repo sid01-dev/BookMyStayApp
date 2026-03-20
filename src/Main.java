@@ -1,6 +1,3 @@
-import model.*;
-import service.*;
-
 public class Main {
     public static void main(String[] args) {
 
@@ -11,23 +8,19 @@ public class Main {
         BookingService bookingService =
                 new BookingService(queue, inventory, history);
 
-        BookingReportService reportService =
-                new BookingReportService(history);
-
-        // Add requests
+        // VALID
         queue.addRequest(new Reservation("Alice", "Deluxe"));
-        queue.addRequest(new Reservation("Bob", "Standard"));
-        queue.addRequest(new Reservation("Charlie", "Suite"));
 
-        // Process bookings
+        // INVALID room type
+        queue.addRequest(new Reservation("Bob", "Luxury"));
+
+        // EMPTY name
+        queue.addRequest(new Reservation("", "Standard"));
+
+        // Process all
         bookingService.processNext();
         bookingService.processNext();
         bookingService.processNext();
-
-        // Show history
-        history.displayHistory();
-
-        // Generate report
-        reportService.generateSummaryReport();
     }
 }
+
