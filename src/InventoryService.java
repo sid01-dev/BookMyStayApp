@@ -1,17 +1,19 @@
-public void releaseRoom(String roomType, String roomId) {
+public synchronized String allocateRoom(String roomType) {
 
-    if (!allocatedRooms.containsKey(roomType) ||
-            !allocatedRooms.get(roomType).contains(roomId)) {
-        throw new RuntimeException("Invalid rollback: Room not found");
+    if (!isAvailable(roomType)) {
+        return null;
     }
 
-    // Remove from allocated set
-    allocatedRooms.get(roomType).remove(roomId);
+    allocatedRooms.putIfAbsent(roomType, new HashSet<>());
 
-    // Restore inventory
-    inventory.put(roomType, inventory.get(roomType) + 1);
+    String roomId = roomType.substring(0, 3).toUpperCase() + "-" + UUID.randomUUID();
 
-    System.out.println("Room released: " + roomId);
+    allocatedRooms.get(roomType).add(roomId);
+
+    // Critical section
+    inventory.put(roomType, inventory.get(roomType) - 1);
+
+    return roomId;
 }
 
 void main() {

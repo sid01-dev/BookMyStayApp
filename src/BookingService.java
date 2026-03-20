@@ -1,32 +1,24 @@
-import exception.InvalidBookingException;
+public void processNextThreadSafe() {
 
-public void processNext() {
+    Reservation reservation;
 
-    Reservation reservation = queue.processNextRequest();
-
-    if (reservation == null) {
-        System.out.println("No requests to process");
-        return;
+    synchronized (queue) {
+        reservation = queue.processNextRequest();
     }
 
-    try {
-        // ✅ VALIDATION (Fail-Fast)
-        service.BookingValidator.validate(reservation, inventory);
+    if (reservation == null) return;
+
+    synchronized (inventory) {
+        if (!inventory.isAvailable(reservation.getRoomType())) {
+            System.out.println(Thread.currentThread().getName() +
+                    " -> No rooms available");
+            return;
+        }
 
         String roomId = inventory.allocateRoom(reservation.getRoomType());
 
-        System.out.println("Booking Confirmed!");
-        System.out.println("Guest: " + reservation.getGuestName());
-        System.out.println("Room ID: " + roomId);
-
-        // existing history logic (Use Case 8)
-        bookingHistory.addBooking(reservation);
-
-    } catch (InvalidBookingException e) {
-        // ✅ Graceful failure
-        System.out.println("Booking Failed: " + e.getMessage());
-    } catch (Exception e) {
-        System.out.println("Unexpected error: " + e.getMessage());
+        System.out.println(Thread.currentThread().getName() +
+                " -> Booked " + roomId + " for " + reservation.getGuestName());
     }
 }
 

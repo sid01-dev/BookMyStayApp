@@ -10,26 +10,21 @@ public class Main {
         BookingService bookingService =
                 new BookingService(queue, inventory, history, cancelService);
 
-        // Add bookings
-        Reservation r1 = new Reservation("Alice", "Deluxe");
-        Reservation r2 = new Reservation("Bob", "Standard");
+        // Add multiple requests
+        for (int i = 1; i <= 10; i++) {
+            queue.addRequest(new Reservation("Guest-" + i, "Standard"));
+        }
 
-        queue.addRequest(r1);
-        queue.addRequest(r2);
+        // Create multiple threads
+        Thread t1 = new Thread(new ConcurrentBookingProcessor(bookingService), "Thread-1");
+        Thread t2 = new Thread(new ConcurrentBookingProcessor(bookingService), "Thread-2");
+        Thread t3 = new Thread(new ConcurrentBookingProcessor(bookingService), "Thread-3");
 
-        // Confirm bookings
-        bookingService.processNext();
-        bookingService.processNext();
-
-        history.displayHistory();
-
-        // Cancel one booking
-        cancelService.cancelBooking(r1.getReservationId(), r1.getRoomType());
-
-        // Show updated state
-        history.displayHistory();
-        inventory.printStatus();
-        cancelService.showRollbackStack();
+        // Start threads
+        t1.start();
+        t2.start();
+        t3.start();
     }
 }
+
 
