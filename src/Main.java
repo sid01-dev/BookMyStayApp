@@ -4,23 +4,32 @@ public class Main {
         BookingRequestQueue queue = new BookingRequestQueue();
         InventoryService inventory = new InventoryService();
         BookingHistory history = new BookingHistory();
+        CancellationService cancelService =
+                new CancellationService(inventory, history);
 
         BookingService bookingService =
-                new BookingService(queue, inventory, history);
+                new BookingService(queue, inventory, history, cancelService);
 
-        // VALID
-        queue.addRequest(new Reservation("Alice", "Deluxe"));
+        // Add bookings
+        Reservation r1 = new Reservation("Alice", "Deluxe");
+        Reservation r2 = new Reservation("Bob", "Standard");
 
-        // INVALID room type
-        queue.addRequest(new Reservation("Bob", "Luxury"));
+        queue.addRequest(r1);
+        queue.addRequest(r2);
 
-        // EMPTY name
-        queue.addRequest(new Reservation("", "Standard"));
-
-        // Process all
+        // Confirm bookings
         bookingService.processNext();
         bookingService.processNext();
-        bookingService.processNext();
+
+        history.displayHistory();
+
+        // Cancel one booking
+        cancelService.cancelBooking(r1.getReservationId(), r1.getRoomType());
+
+        // Show updated state
+        history.displayHistory();
+        inventory.printStatus();
+        cancelService.showRollbackStack();
     }
 }
 
