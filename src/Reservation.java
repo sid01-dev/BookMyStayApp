@@ -1,8 +1,7 @@
 import java.io.Serializable;
 
-public class InventoryService implements Serializable {
+public class Reservation implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // existing fields...
 }
-
